@@ -8,10 +8,9 @@ import Profile from './components/Profile';
 
 export default function App() {
     const [currentUser, setCurrentUser] = useState(null);
-    const [activeTab, setActiveTab] = useState('dashboard');
+    const [activeTab, setActiveTab]     = useState('dashboard');
 
     useEffect(() => {
-        // Load stored user session if available
         const savedUser = localStorage.getItem('circlehub_user');
         if (savedUser) {
             try {
@@ -42,11 +41,11 @@ export default function App() {
 
     return (
         <div className="app-container">
-            <Navbar 
-                currentUser={currentUser} 
-                activeTab={activeTab} 
-                setActiveTab={setActiveTab} 
-                onLogout={handleLogout} 
+            <Navbar
+                currentUser={currentUser}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                onLogout={handleLogout}
             />
 
             <main className="main-content">
@@ -55,16 +54,24 @@ export default function App() {
                 ) : (
                     <>
                         {activeTab === 'dashboard' && (
-                            <Dashboard currentUser={currentUser} setActiveTab={setActiveTab} />
+                            <div key="dashboard" className="page-enter">
+                                <Dashboard currentUser={currentUser} setActiveTab={setActiveTab} />
+                            </div>
                         )}
                         {activeTab === 'circles' && (
-                            <Circles currentUser={currentUser} />
+                            <div key="circles" className="page-enter">
+                                <Circles currentUser={currentUser} />
+                            </div>
                         )}
                         {activeTab === 'events' && (
-                            <Events currentUser={currentUser} />
+                            <div key="events" className="page-enter">
+                                <Events currentUser={currentUser} />
+                            </div>
                         )}
                         {activeTab === 'profile' && (
-                            <Profile currentUser={currentUser} onUserUpdated={handleUserUpdated} />
+                            <div key="profile" className="page-enter">
+                                <Profile currentUser={currentUser} onUserUpdated={handleUserUpdated} />
+                            </div>
                         )}
                     </>
                 )}
