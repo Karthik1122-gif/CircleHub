@@ -11,14 +11,12 @@ app.use(cors({
 
 app.use(express.json({ limit: '50kb' }));
 
-// Cached MongoDB connection across serverless function invocations
+// Cached MongoDB connection
 let isConnected = false;
 async function connectDB() {
     if (isConnected && mongoose.connection.readyState === 1) return;
     const uri = process.env.MONGO_URI;
-    if (!uri) {
-        throw new Error('MONGO_URI is not defined in environment variables.');
-    }
+    if (!uri) throw new Error('MONGO_URI is missing in environment variables.');
     await mongoose.connect(uri, {
         serverSelectionTimeoutMS: 8000,
         bufferCommands: false
@@ -56,6 +54,9 @@ const circleSchema = new mongoose.Schema({
     created_by:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 }, { timestamps: true });
 
+circleSchema.index({ created_by: 1 });
+circleSchema.index({ createdAt: -1 });
+
 const circleMemberSchema = new mongoose.Schema({
     circle_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Circle', required: true },
     user_id:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -72,6 +73,9 @@ const eventSchema = new mongoose.Schema({
     created_by:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 }, { timestamps: true });
 
+eventSchema.index({ circle_id: 1, event_date: 1 });
+eventSchema.index({ event_date: 1 });
+
 const User         = mongoose.models.User         || mongoose.model('User',         userSchema);
 const Circle       = mongoose.models.Circle       || mongoose.model('Circle',       circleSchema);
 const CircleMember = mongoose.models.CircleMember || mongoose.model('CircleMember', circleMemberSchema);
@@ -84,13 +88,15 @@ const formatUser = (rawUser) => {
     return { ...rest, _id: idStr, id: idStr };
 };
 
-// Ping / Health
-app.get('/api/ping', (req, res) => {
-    res.json({ status: 'ok', db: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected', ts: Date.now() });
+const router = express.Router();
+
+// Ping
+router.get('/ping', (req, res) => {
+    res.json({ status: 'ok', db: mongoose.connection.readyState === 1 ? 'connected' : 'connecting', ts: Date.now() });
 });
 
 // Register
-app.post('/api/register', async (req, res) => {
+router.post('/register', async (req, res) => {
     const { name, email, password, location, bio, interests, skills } = req.body || {};
     if (!name || !name.trim()) return res.status(400).json({ error: 'Full name is required.' });
     if (!email || !email.trim()) return res.status(400).json({ error: 'Email address is required.' });
@@ -119,7 +125,7 @@ app.post('/api/register', async (req, res) => {
 });
 
 // Login
-app.post('/api/login', async (req, res) => {
+router.post('/login', async (req, res) => {
     const { email, password } = req.body || {};
     if (!email || !password) return res.status(400).json({ error: 'Email and password are required.' });
 
@@ -137,7 +143,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 // User Profile
-app.get('/api/users/:id', async (req, res) => {
+router.get('/users/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id).select('-password -__v').lean();
         if (!user) return res.status(404).json({ error: 'User not found.' });
@@ -147,7 +153,7 @@ app.get('/api/users/:id', async (req, res) => {
     }
 });
 
-app.put('/api/users/:id', async (req, res) => {
+router.put('/users/:id', async (req, res) => {
     const { name, location, bio, interests, skills } = req.body || {};
     try {
         const updatedUser = await User.findByIdAndUpdate(
@@ -163,7 +169,7 @@ app.put('/api/users/:id', async (req, res) => {
 });
 
 // Circles
-app.get('/api/circles', async (req, res) => {
+router.get('/circles', async (req, res) => {
     const userId = req.query.userId || null;
     try {
         const circles = await Circle.find().populate('created_by', 'name').sort({ createdAt: -1 }).lean();
@@ -196,7 +202,7 @@ app.get('/api/circles', async (req, res) => {
     }
 });
 
-app.post('/api/circles', async (req, res) => {
+router.post('/circles', async (req, res) => {
     const { name, description, category, location, created_by } = req.body || {};
     if (!name || !description || !category || !location || !created_by) {
         return res.status(400).json({ error: 'All fields are required.' });
@@ -210,7 +216,7 @@ app.post('/api/circles', async (req, res) => {
     }
 });
 
-app.get('/api/circles/:id', async (req, res) => {
+router.get('/circles/:id', async (req, res) => {
     try {
         const [circle, member_count] = await Promise.all([
             Circle.findById(req.params.id).populate('created_by', 'name').lean(),
@@ -229,7 +235,7 @@ app.get('/api/circles/:id', async (req, res) => {
     }
 });
 
-app.post('/api/circles/:id/join', async (req, res) => {
+router.post('/circles/:id/join', async (req, res) => {
     const { userId } = req.body || {};
     if (!userId) return res.status(400).json({ error: 'User ID is required.' });
     try {
@@ -244,7 +250,7 @@ app.post('/api/circles/:id/join', async (req, res) => {
     }
 });
 
-app.post('/api/circles/:id/leave', async (req, res) => {
+router.post('/circles/:id/leave', async (req, res) => {
     const { userId } = req.body || {};
     if (!userId) return res.status(400).json({ error: 'User ID is required.' });
     try {
@@ -255,7 +261,7 @@ app.post('/api/circles/:id/leave', async (req, res) => {
     }
 });
 
-app.get('/api/circles/:id/members', async (req, res) => {
+router.get('/circles/:id/members', async (req, res) => {
     try {
         const members = await CircleMember.find({ circle_id: req.params.id })
             .populate('user_id', 'name email location')
@@ -276,7 +282,7 @@ app.get('/api/circles/:id/members', async (req, res) => {
 });
 
 // Events
-app.get('/api/events', async (req, res) => {
+router.get('/events', async (req, res) => {
     try {
         const events = await Event.find().populate('circle_id', 'name').populate('created_by', 'name').sort({ event_date: 1 }).lean();
         const result = events.map(e => ({
@@ -292,7 +298,7 @@ app.get('/api/events', async (req, res) => {
     }
 });
 
-app.post('/api/events', async (req, res) => {
+router.post('/events', async (req, res) => {
     const { circle_id, title, description, event_date, location, created_by } = req.body || {};
     if (!circle_id || !title || !description || !event_date || !location || !created_by) {
         return res.status(400).json({ error: 'All fields are required.' });
@@ -306,7 +312,7 @@ app.post('/api/events', async (req, res) => {
 });
 
 // Dashboard
-app.get('/api/dashboard/:userId', async (req, res) => {
+router.get('/dashboard/:userId', async (req, res) => {
     const userId = req.params.userId;
     try {
         let validUserObjectId = null;
@@ -355,5 +361,9 @@ app.get('/api/dashboard/:userId', async (req, res) => {
         return res.status(500).json({ error: 'Error fetching dashboard data.' });
     }
 });
+
+// Mount router on both /api and / to handle all routing conventions seamlessly
+app.use('/api', router);
+app.use('/', router);
 
 export default app;
