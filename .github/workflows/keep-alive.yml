@@ -1,0 +1,21 @@
+name: Keep Render Backend Alive
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'   # Every 5 minutes, 24/7
+  workflow_dispatch:         # Allow manual trigger too
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping CircleHub Backend
+        run: |
+          echo "🏓 Pinging CircleHub backend..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://circlehub-m1vy.onrender.com/ping)
+          echo "Response status: $STATUS"
+          if [ "$STATUS" = "200" ]; then
+            echo "✅ Backend is alive!"
+          else
+            echo "⚠️  Backend returned status $STATUS — may be waking up"
+          fi
