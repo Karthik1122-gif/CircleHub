@@ -7,8 +7,25 @@ const connectDB = require('./db');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
+// Middleware — dynamic CORS for local dev + Vercel production
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    /\.vercel\.app$/        // any *.vercel.app subdomain
+];
+
+app.use(cors({
+    origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, Postman)
+        if (!origin) return callback(null, true);
+        const isAllowed = allowedOrigins.some(allowed =>
+            allowed instanceof RegExp ? allowed.test(origin) : allowed === origin
+        );
+        if (isAllowed) return callback(null, true);
+        callback(new Error(`CORS blocked: ${origin}`));
+    },
+    credentials: true
+}));
 app.use(express.json());
 
 // ==========================================
