@@ -3,23 +3,25 @@ require('dotenv').config();
 
 const MONGO_URI = process.env.MONGO_URI;
 
-if (!MONGO_URI) {
-    console.error('❌ MONGO_URI is not defined in .env');
-    process.exit(1);
-}
-
 const connectDB = async () => {
+    if (!MONGO_URI) {
+        console.error('❌ MONGO_URI is not defined in environment variables.');
+        return;
+    }
+
     try {
-        await mongoose.connect(MONGO_URI);
+        await mongoose.connect(MONGO_URI, {
+            serverSelectionTimeoutMS: 8000,
+            socketTimeoutMS: 45000,
+        });
         console.log('✅ Connected to MongoDB Atlas:', mongoose.connection.name);
     } catch (err) {
-        console.error('❌ MongoDB connection failed:', err.message);
-        console.log('💡 Check your MONGO_URI in .env and ensure your IP is whitelisted on Atlas.');
-        process.exit(1);
+        console.error('❌ MongoDB initial connection failed:', err.message);
+        console.log('🔄 Will retry connection automatically in 5 seconds...');
+        setTimeout(connectDB, 5000);
     }
 };
 
-// Listen for connection events dynamically
 mongoose.connection.on('connected', () => {
     console.log('🔗 Mongoose connected to:', mongoose.connection.host);
 });
@@ -29,13 +31,13 @@ mongoose.connection.on('error', (err) => {
 });
 
 mongoose.connection.on('disconnected', () => {
-    console.warn('🔌 Mongoose disconnected from MongoDB.');
+    console.warn('🔌 Mongoose disconnected from MongoDB. Reconnecting...');
 });
 
-// Graceful shutdown
 process.on('SIGINT', async () => {
-    await mongoose.connection.close();
-    console.log('🛑 MongoDB connection closed (SIGINT).');
+    try {
+        await mongoose.connection.close();
+    } catch {}
     process.exit(0);
 });
 

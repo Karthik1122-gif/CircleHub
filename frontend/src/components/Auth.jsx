@@ -23,42 +23,42 @@ export default function Auth({ onLoginSuccess }) {
         name: '', email: '', password: '',
         location: 'Downtown Heights', bio: '', interests: '', skills: ''
     });
-    const [touched, setTouched] = useState({});
+    const [touched, setTouched]           = useState({});
     const [showPassword, setShowPassword] = useState(false);
-    const [error, setError]       = useState('');
-    const [loading, setLoading]   = useState(false);
-    const [successFlash, setSuccessFlash] = useState(false);
+    const [error, setError]               = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+    const [loading, setLoading]           = useState(false);
     const [serverReady, setServerReady]   = useState(false);
     const [warming, setWarming]           = useState(true);
 
     /* Pre-warm backend */
     useEffect(() => {
         let attempts = 0;
-        const maxAttempts = 12;
+        const maxAttempts = 10;
 
         const checkServer = async () => {
             try {
                 const res = await fetch(
                     (import.meta.env.VITE_API_URL || 'http://localhost:5000/api')
-                        .replace('/api', '') + '/ping'
+                        .replace(/\/api\/?$/, '') + '/ping'
                 );
                 if (res.ok) { setServerReady(true); setWarming(false); return; }
             } catch {}
 
             attempts++;
-            if (attempts < maxAttempts) setTimeout(checkServer, 5000);
+            if (attempts < maxAttempts) setTimeout(checkServer, 4000);
             else setWarming(false);
         };
 
         wakeBackend();
-        setTimeout(checkServer, 2000);
+        setTimeout(checkServer, 1500);
     }, []);
 
     /* ── Validation ─────────────────────────────────────── */
     const validate = {
-        name:     v => v.trim().length >= 2   ? '' : 'Name must be at least 2 characters',
-        email:    v => emailRegex.test(v)      ? '' : 'Enter a valid email address',
-        password: v => v.length >= 6           ? '' : 'Password must be at least 6 characters',
+        name:     v => (v && v.trim().length >= 2) ? '' : 'Full name must be at least 2 characters',
+        email:    v => (v && emailRegex.test(v.trim())) ? '' : 'Enter a valid email address (e.g. name@example.com)',
+        password: v => (v && v.length >= 6) ? '' : 'Password must be at least 6 characters long',
     };
 
     const fieldError = (field) => {
@@ -71,15 +71,11 @@ export default function Auth({ onLoginSuccess }) {
         return validate[field](formData[field]) === '';
     };
 
-    const requiredFieldsOk = isLogin
-        ? isFieldValid('email') && isFieldValid('password')
-        : isFieldValid('name') && isFieldValid('email') && isFieldValid('password');
-
     /* ── Handlers ───────────────────────────────────────── */
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-        setTouched(prev => ({ ...prev, [name]: true }));
+        setError('');
     };
 
     const handleBlur = (e) => {
@@ -89,29 +85,55 @@ export default function Auth({ onLoginSuccess }) {
     const switchMode = (login) => {
         setIsLogin(login);
         setError('');
+        setSuccessMessage('');
         setTouched({});
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        // Mark all required fields touched
-        const fields = isLogin ? ['email', 'password'] : ['name', 'email', 'password'];
-        setTouched(prev => ({ ...prev, ...Object.fromEntries(fields.map(f => [f, true])) }));
-        if (!requiredFieldsOk) return;
+        setSuccessMessage('');
+
+        // Validate required fields
+        if (!isLogin && (!formData.name || formData.name.trim().length < 2)) {
+            setTouched(prev => ({ ...prev, name: true }));
+            setError('Please enter your full name (at least 2 characters).');
+            return;
+        }
+
+        if (!formData.email || !emailRegex.test(formData.email.trim())) {
+            setTouched(prev => ({ ...prev, email: true }));
+            setError('Please enter a valid email address (e.g. name@example.com).');
+            return;
+        }
+
+        if (!formData.password || formData.password.length < 6) {
+            setTouched(prev => ({ ...prev, password: true }));
+            setError('Password must be at least 6 characters long.');
+            return;
+        }
 
         setLoading(true);
+
         try {
             if (isLogin) {
-                const res = await api.login({ email: formData.email, password: formData.password });
-                setSuccessFlash(true);
-                setTimeout(() => onLoginSuccess(res.user), 600);
+                const res = await api.login({
+                    email: formData.email.trim(),
+                    password: formData.password
+                });
+                setSuccessMessage('🎉 Login successful! Welcome back!');
+                setTimeout(() => onLoginSuccess(res.user), 500);
             } else {
-                const res = await api.register(formData);
-                onLoginSuccess(res.user);
+                const res = await api.register({
+                    ...formData,
+                    email: formData.email.trim()
+                });
+                setSuccessMessage('🎉 Account created successfully! Setting up your dashboard...');
+                setTimeout(() => onLoginSuccess(res.user), 700);
             }
         } catch (err) {
-            setError(err.message || 'Authentication failed. Please try again.');
+            console.error('Auth submit error:', err);
+            setError(err.message || 'Operation failed. Please check your details and try again.');
         } finally {
             setLoading(false);
         }
@@ -128,11 +150,10 @@ export default function Auth({ onLoginSuccess }) {
         );
     };
 
-    /* ── Password strength ──────────────────────────────── */
     const strength = getPasswordStrength(formData.password);
 
     return (
-        <div className={`auth-wrapper ${successFlash ? 'success-flash' : ''}`}>
+        <div className="auth-wrapper">
             <div className="auth-header">
                 <h2>{isLogin ? 'Welcome Back! 👋' : 'Join CircleHub 🌿'}</h2>
                 <p>
@@ -151,22 +172,34 @@ export default function Auth({ onLoginSuccess }) {
                     display: 'flex', alignItems: 'center', gap: '8px'
                 }}>
                     <span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>⏳</span>
-                    <span><strong>Waking up server…</strong> This takes ~15 seconds on first load. Please wait.</span>
+                    <span><strong>Connecting to server…</strong> Waking up services. Please wait a moment.</span>
                 </div>
             )}
 
             {serverReady && (
                 <div style={{
                     background: '#f0fdf4', border: '1px solid #22c55e',
-                    borderRadius: '8px', padding: '10px 14px',
-                    marginBottom: '16px', fontSize: '0.85rem', color: '#166534',
+                    borderRadius: '8px', padding: '8px 12px',
+                    marginBottom: '16px', fontSize: '0.82rem', color: '#166534',
                     display: 'flex', alignItems: 'center', gap: '8px'
                 }}>
-                    ✅ <span><strong>Server is ready!</strong> You can sign in now.</span>
+                    ✅ <span><strong>Server is online and ready!</strong></span>
                 </div>
             )}
 
-            {error && <div className="alert alert-danger">⚠️ {error}</div>}
+            {error && (
+                <div className="alert alert-danger" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>⚠️</span>
+                    <span>{error}</span>
+                </div>
+            )}
+
+            {successMessage && (
+                <div className="alert alert-success" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>✅</span>
+                    <span>{successMessage}</span>
+                </div>
+            )}
 
             <form onSubmit={handleSubmit} noValidate>
 
@@ -178,9 +211,14 @@ export default function Auth({ onLoginSuccess }) {
                         </label>
                         <div className="input-wrapper">
                             <input
-                                type="text" name="name" className={`form-input ${fieldError('name') ? 'error' : touched.name && isFieldValid('name') ? 'valid' : ''}`}
+                                type="text"
+                                name="name"
+                                className={`form-input ${fieldError('name') ? 'error' : (touched.name && isFieldValid('name')) ? 'valid' : ''}`}
                                 placeholder="e.g. Sarah Jenkins"
-                                value={formData.name} onChange={handleChange} onBlur={handleBlur}
+                                value={formData.name}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                autoComplete="name"
                             />
                             <FieldIcon field="name" />
                         </div>
@@ -197,9 +235,14 @@ export default function Auth({ onLoginSuccess }) {
                     </label>
                     <div className="input-wrapper">
                         <input
-                            type="email" name="email" className={`form-input ${fieldError('email') ? 'error' : touched.email && isFieldValid('email') ? 'valid' : ''}`}
+                            type="email"
+                            name="email"
+                            className={`form-input ${fieldError('email') ? 'error' : (touched.email && isFieldValid('email')) ? 'valid' : ''}`}
                             placeholder="name@example.com"
-                            value={formData.email} onChange={handleChange} onBlur={handleBlur}
+                            value={formData.email}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            autoComplete="email"
                         />
                         <FieldIcon field="email" />
                     </div>
@@ -215,14 +258,19 @@ export default function Auth({ onLoginSuccess }) {
                     </label>
                     <div className="input-wrapper">
                         <input
-                            type={showPassword ? 'text' : 'password'} name="password"
-                            className={`form-input ${fieldError('password') ? 'error' : touched.password && isFieldValid('password') ? 'valid' : ''}`}
+                            type={showPassword ? 'text' : 'password'}
+                            name="password"
+                            className={`form-input ${fieldError('password') ? 'error' : (touched.password && isFieldValid('password')) ? 'valid' : ''}`}
                             placeholder="••••••••"
-                            value={formData.password} onChange={handleChange} onBlur={handleBlur}
+                            value={formData.password}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            autoComplete={isLogin ? "current-password" : "new-password"}
                             style={{ paddingRight: '72px' }}
                         />
                         <button
-                            type="button" className="input-toggle-btn"
+                            type="button"
+                            className="input-toggle-btn"
                             onClick={() => setShowPassword(v => !v)}
                             tabIndex={-1}
                         >
@@ -233,14 +281,14 @@ export default function Auth({ onLoginSuccess }) {
                         ? <span className="field-error">⚠ {fieldError('password')}</span>
                         : <span className="form-hint">Minimum 6 characters</span>}
 
-                    {/* Password strength */}
-                    {formData.password && (
+                    {/* Password strength bar */}
+                    {!isLogin && formData.password && (
                         <div className="pw-strength">
                             <div className="pw-strength-bar">
                                 <div className={`pw-strength-fill ${strength}`} />
                             </div>
                             <span className={`pw-strength-label ${strength}`}>
-                                {strength === 'weak' ? '🔴 Weak' : strength === 'medium' ? '🟡 Medium' : '🟢 Strong'}
+                                {strength === 'weak' ? '🔴 Weak password' : strength === 'medium' ? '🟡 Medium strength' : '🟢 Strong password'}
                             </span>
                         </div>
                     )}
@@ -255,9 +303,12 @@ export default function Auth({ onLoginSuccess }) {
                                 <span className="optional-tag">(Optional)</span>
                             </label>
                             <input
-                                type="text" name="location" className="form-input"
+                                type="text"
+                                name="location"
+                                className="form-input"
                                 placeholder="e.g. Downtown Heights"
-                                value={formData.location} onChange={handleChange}
+                                value={formData.location}
+                                onChange={handleChange}
                             />
                             <span className="form-hint">Your local neighborhood or city area</span>
                         </div>
@@ -268,9 +319,12 @@ export default function Auth({ onLoginSuccess }) {
                                 <span className="optional-tag">(Optional)</span>
                             </label>
                             <textarea
-                                name="bio" className="form-textarea" rows="2"
+                                name="bio"
+                                className="form-textarea"
+                                rows="2"
                                 placeholder="Share a few words about yourself…"
-                                value={formData.bio} onChange={handleChange}
+                                value={formData.bio}
+                                onChange={handleChange}
                             />
                         </div>
 
@@ -280,9 +334,12 @@ export default function Auth({ onLoginSuccess }) {
                                 <span className="optional-tag">(Optional)</span>
                             </label>
                             <input
-                                type="text" name="interests" className="form-input"
+                                type="text"
+                                name="interests"
+                                className="form-input"
                                 placeholder="Reading, Gardening, Tech"
-                                value={formData.interests} onChange={handleChange}
+                                value={formData.interests}
+                                onChange={handleChange}
                             />
                             <span className="form-hint">Comma-separated list of your interests</span>
                         </div>
@@ -293,9 +350,12 @@ export default function Auth({ onLoginSuccess }) {
                                 <span className="optional-tag">(Optional)</span>
                             </label>
                             <input
-                                type="text" name="skills" className="form-input"
+                                type="text"
+                                name="skills"
+                                className="form-input"
                                 placeholder="Yoga, Coding, Cooking"
-                                value={formData.skills} onChange={handleChange}
+                                value={formData.skills}
+                                onChange={handleChange}
                             />
                             <span className="form-hint">Comma-separated list of skills you can offer</span>
                         </div>
@@ -305,12 +365,17 @@ export default function Auth({ onLoginSuccess }) {
                 <button
                     type="submit"
                     className="btn btn-primary"
-                    style={{ width: '100%', marginTop: '4px' }}
-                    disabled={loading || !requiredFieldsOk}
+                    style={{ width: '100%', marginTop: '8px', height: '44px', fontSize: '1rem' }}
+                    disabled={loading}
                 >
-                    {loading
-                        ? <><span className="spinner" /> {isLogin ? 'Signing in…' : 'Creating account…'}</>
-                        : (isLogin ? 'Sign In' : 'Create Account')}
+                    {loading ? (
+                        <>
+                            <span className="spinner" style={{ width: '18px', height: '18px', marginRight: '8px' }} />
+                            {isLogin ? 'Signing In…' : 'Creating Account…'}
+                        </>
+                    ) : (
+                        isLogin ? 'Sign In 🚀' : 'Create Account ✨'
+                    )}
                 </button>
             </form>
 
