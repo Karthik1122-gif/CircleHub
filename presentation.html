@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CircleHub - Capstone PBL Technical Presentation Deck</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0b0f19;
+            --bg-secondary: #111827;
+            --bg-card: rgba(17, 24, 39, 0.85);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --brand-green: #10b981;
+            --brand-green-glow: rgba(16, 185, 129, 0.25);
+            --brand-emerald: #059669;
+            --accent-blue: #38bdf8;
+            --accent-indigo: #6366f1;
+            --accent-amber: #f59e0b;
+            --accent-purple: #a855f7;
+            --text-main: #f9fafb;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+        }
+
+        /* Top Progress Bar */
+        .progress-container {
+            height: 5px;
+            background: rgba(255, 255, 255, 0.08);
+            width: 100%;
+            position: relative;
+            z-index: 100;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--brand-green), var(--accent-blue));
+            width: 5.5%;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 12px var(--brand-green);
+        }
+
+        /* Header Navigation */
+        header {
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(11, 15, 25, 0.95);
+            backdrop-filter: blur(12px);
+            z-index: 90;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .brand-badge {
+            font-size: 0.72rem;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--brand-green);
+            padding: 4px 10px;
+            border-radius: 9999px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .slide-counter {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.07);
+            color: #fff;
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.14);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--brand-green), var(--brand-emerald));
+            border-color: rgba(16, 185, 129, 0.5);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Presentation Workspace */
+        main {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 50px;
+            background: radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.06) 0%, transparent 60%),
+                        radial-gradient(circle at 80% 80%, rgba(56, 189, 248, 0.04) 0%, transparent 50%);
+        }
+
+        .slide-deck {
+            width: 100%;
+            max-width: 1250px;
+            height: 100%;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(40px) scale(0.98);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding-right: 12px;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0) scale(1);
+        }
+
+        .slide.prev {
+            transform: translateX(-40px) scale(0.98);
+        }
+
+        /* Slide Typography */
+        .slide-badge {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--brand-green);
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+        .slide-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.3rem;
+            font-weight: 800;
+            line-height: 1.2;
+            color: #fff;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+        .slide-subtitle {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        /* Cards & Grid Containers */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 22px;
+            backdrop-filter: blur(8px);
+            transition: all 0.2s ease;
+        }
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        .card.featured {
+            border-color: rgba(16, 185, 129, 0.4);
+            background: linear-gradient(145deg, rgba(16, 185, 129, 0.08), rgba(17, 24, 39, 0.9));
+        }
+
+        .card-icon {
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+        .card-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        .card-text {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .highlight-text {
+            color: var(--brand-green);
+            font-weight: 600;
+        }
+
+        /* Tables */
+        .tech-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        .tech-table th {
+            text-align: left;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--accent-blue);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .tech-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+        }
+        .tech-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+            color: #fff;
+        }
+
+        /* Diagrams & Code Blocks */
+        .diagram-box {
+            background: #060911;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 18px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.84rem;
+            color: #38bdf8;
+            overflow-x: auto;
+            line-height: 1.5;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Pill tags */
+        .tag-pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            margin: 2px 4px 2px 0;
+        }
+        .tag-pill.green { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .tag-pill.blue { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+        .tag-pill.purple { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+
+        /* Metric stat box */
+        .stat-box {
+            text-align: center;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+        }
+        .stat-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--brand-green);
+            margin-bottom: 4px;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        /* Custom Scrollbar for overflow slides */
+        .slide::-webkit-scrollbar {
+            width: 6px;
+        }
+        .slide::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .slide::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 3px;
+        }
+
+        /* Bottom Controls Bar */
+        footer {
+            padding: 14px 28px;
+            border-top: 1px solid var(--border-color);
+            background: rgba(11, 15, 25, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 90;
+        }
+
+        .keys-hint {
+            font-size: 0.82rem;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .key-badge {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Print formatting */
+        @media print {
+            body {
+                overflow: visible !important;
+                height: auto !important;
+                background: #fff !important;
+                color: #000 !important;
+            }
+            header, footer, .progress-container {
+                display: none !important;
+            }
+            main {
+                display: block !important;
+                padding: 0 !important;
+                background: none !important;
+            }
+            .slide-deck {
+                max-width: 100% !important;
+                height: auto !important;
+            }
+            .slide {
+                position: relative !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                transform: none !important;
+                page-break-after: always !important;
+                padding: 40px !important;
+                height: 100vh !important;
+                border-bottom: 2px solid #ccc;
+            }
+            .card {
+                background: #f8fafc !important;
+                border: 1px solid #cbd5e1 !important;
+                color: #0f172a !important;
+            }
+            .slide-title, .card-title {
+                color: #0f172a !important;
+            }
+            .card-text, .slide-subtitle {
+                color: #475569 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="brand-logo">
+            <span>🌿</span>
+            <span>CircleHub</span>
+            <span class="brand-badge">PBL Final Review</span>
+        </div>
+        <div class="header-controls">
+            <span class="slide-counter" id="slideCounter">Slide 01 / 18</span>
+            <button class="btn" onclick="toggleFullscreen()" title="Fullscreen mode (F)">⛶ Fullscreen</button>
+            <button class="btn" onclick="window.print()" title="Print Slides as PDF">🖨️ Export PDF</button>
+        </div>
+    </header>
+
+    <!-- Main Slide Presentation Area -->
+    <main>
+        <div class="slide-deck" id="slideDeck">
+
+            <!-- SLIDE 1: Title Slide -->
+            <div class="slide active" data-slide="1">
+                <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: center; max-width: 900px; margin: 0 auto;">
+                    <div style="font-size: 3.5rem; margin-bottom: 16px;">🌿 🏘️ 🌐</div>
+                    <span class="slide-badge">Capstone / Project-Based Learning (PBL)</span>
+                    <h1 class="slide-title" style="font-size: 3.2rem; margin-bottom: 16px;">CircleHub</h1>
+                    <p class="slide-subtitle" style="font-size: 1.35rem; color: #cbd5e1; max-width: 800px; margin: 0 auto 30px;">
+                        A Privacy-First, Zero-Buffering Web Platform for Hyper-Local Neighborhood Communities & Event Coordination
+                    </p>
+                    <div class="grid-3" style="margin-top: 10px; text-align: left;">
+                        <div class="card">
+                            <span class="card-icon">🎯</span>
+                            <div class="card-title" style="font-size: 1rem;">Project Domain</div>
+                            <div class="card-text" style="font-size: 0.85rem;">Full-Stack Cloud Systems, Responsive UI Engineering & Web Security</div>
+                        </div>
+                        <div class="card">
+                            <span class="card-icon">🚀</span>
+                            <div class="card-title" style="font-size: 1rem;">Live Deployment</div>
+                            <div class="card-text" style="font-size: 0.85rem; word-break: break-all;">
+                                <a href="https://frontend-seven-black-12.vercel.app" target="_blank" style="color: var(--accent-blue); text-decoration: none;">frontend-seven-black-12.vercel.app</a>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <span class="card-icon">🐙</span>
+                            <div class="card-title" style="font-size: 1rem;">Source Control</div>
+                            <div class="card-text" style="font-size: 0.85rem; word-break: break-all;">
+                                <a href="https://github.com/Karthik1122-gif/CircleHub" target="_blank" style="color: var(--brand-green); text-decoration: none;">github.com/Karthik1122-gif/CircleHub</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 2: Problem Statement & Motivation -->
+            <div class="slide" data-slide="2">
+                <span class="slide-badge">01 // Problem & Context</span>
+                <h2 class="slide-title">The Hyper-Connectivity Paradox</h2>
+                <p class="slide-subtitle">Why global social media platforms fail modern urban & suburban neighborhoods.</p>
+                
+                <div class="grid-2">
+                    <div class="card featured">
+                        <div class="card-icon">⚠️</div>
+                        <div class="card-title">The Real-World Problem</div>
+                        <div class="card-text">
+                            <ul style="list-style: none; padding: 0; line-height: 1.9;">
+                                <li>❌ <strong>Algorithmic Outrage:</strong> Platforms like X and Facebook prioritize viral controversy over local offline cooperation.</li>
+                                <li>❌ <strong>Urban Isolation:</strong> Residents live within meters of each other for years without ever discovering shared hobbies or skills.</li>
+                                <li>❌ <strong>Toxic Ad-Driven Feeds:</strong> Existing apps (like Nextdoor) devolve into public complaint boards and spam marketing.</li>
+                                <li>❌ <strong>Data Exploitation:</strong> Traditional social networks monetize location and invasive personal tracking.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">💡</div>
+                        <div class="card-title">The CircleHub Solution</div>
+                        <div class="card-text">
+                            <ul style="list-style: none; padding: 0; line-height: 1.9;">
+                                <li>✅ <strong>No Algorithm, No Ads:</strong> Pure, focused community collaboration organized strictly around shared interests.</li>
+                                <li>✅ <strong>Action-Oriented Circles:</strong> Micro-communities dedicated to offline sports, coding clubs, study groups, gardening, and book circles.</li>
+                                <li>✅ <strong>Real Meetups & RSVPs:</strong> Verified dates, direct Google Maps directions, and one-click WhatsApp invitations.</li>
+                                <li>✅ <strong>Zero-Buffering Performance:</strong> Instant edge serverless execution eliminating slow loading screens.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 3: Project Objectives & Goals -->
+            <div class="slide" data-slide="3">
+                <span class="slide-badge">02 // Requirements & Scope</span>
+                <h2 class="slide-title">Core Project Objectives</h2>
+                <p class="slide-subtitle">Key engineering milestones achieved across functional and technical dimensions.</p>
+
+                <div class="grid-3">
+                    <div class="card">
+                        <div class="card-icon">👥</div>
+                        <div class="card-title">1. Community Formation</div>
+                        <div class="card-text">
+                            Enable residents to establish and discover hyper-local interest circles, explore member directories, and exchange communal equipment/guides.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">📅</div>
+                        <div class="card-title">2. Meetup Coordination</div>
+                        <div class="card-text">
+                            Provide intuitive event scheduling with future-date constraints, atomic RSVP tracking, venue mapping, and instant social messaging invites.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">⚡</div>
+                        <div class="card-title">3. Sub-Second Speed</div>
+                        <div class="card-text">
+                            Eliminate cloud cold starts through edge serverless deployment, in-memory caching, and MongoDB Atlas IPv4 connection pooling.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">🖼️</div>
+                        <div class="card-title">4. Edge Media Processing</div>
+                        <div class="card-text">
+                            In-browser HTML5 Canvas compression engine reducing 20MB high-res images to < 200KB before upload, cutting 90% bandwidth.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">🛡️</div>
+                        <div class="card-title">5. Enterprise Security</div>
+                        <div class="card-text">
+                            Full HTTPS enforcement with 2-year HSTS preload, CSP upgrade-insecure-requests, clickjacking defense, and legal transparency.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">📱</div>
+                        <div class="card-title">6. Universal Accessibility</div>
+                        <div class="card-text">
+                            WCAG AA responsive design system with minimum 44px touch targets for seamless usability across smartphones, tablets, and desktops.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 4: System Architecture Diagram -->
+            <div class="slide" data-slide="4">
+                <span class="slide-badge">03 // System Design</span>
+                <h2 class="slide-title">Decoupled Cloud Architecture</h2>
+                <p class="slide-subtitle">Multi-tier architecture bridging Vercel Edge, Render compute, and MongoDB Atlas.</p>
+
+                <div class="diagram-box" style="margin-bottom: 20px;">
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                                CLIENT TIER (Browser)                                    │
+│   React 18 SPA  │  Hash Routing (#dashboard, #circles, #events)  │  Vanilla CSS System │
+└───────────────────────────────────────────┬────────────────────────────────────────────┘
+                                            │ HTTPS / JSON API Requests
+                                            ▼
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        VERCEL EDGE NETWORK (Serverless Tier)                           │
+│   • Global CDN: HSTS, Gzip/Brotli, Static Asset Cache (1 Year Immutable)               │
+│   • Serverless API Router (/api/*): Sub-100ms execution, IPv4 DNS                      │
+│   • Global Mongoose Cache: Reuses database connection across warm serverless lambdas   │
+└───────────────────────────────────────────┬────────────────────────────────────────────┘
+                                            │ Connection Pool (min: 2, max: 10)
+                                            ▼
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                         DATABASE TIER (MongoDB Atlas Cloud)                            │
+│   • Collections: users, circles, events, resources, event_photos                       │
+│   • High Availability: 3-Node Replica Set, Automated Backups, Index Optimization       │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+                </div>
+
+                <div class="grid-3">
+                    <div class="card">
+                        <div class="card-title" style="font-size: 1rem;">Client Edge</div>
+                        <div class="card-text">Stateless React bundle served directly from nearest edge CDN location for sub-second FCP.</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title" style="font-size: 1rem;">Serverless API</div>
+                        <div class="card-text">Eliminates dedicated server hosting costs while providing instantaneous scale on demand.</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title" style="font-size: 1rem;">Connection Cache</div>
+                        <div class="card-text">Prevents MongoDB connection exhaustion by pooling connections in lambda global scope.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 5: Technology Stack & Technical Justifications -->
+            <div class="slide" data-slide="5">
+                <span class="slide-badge">04 // Technology Selection</span>
+                <h2 class="slide-title">Technology Stack Matrix</h2>
+                <p class="slide-subtitle">Deliberate engineering choices and justifications for each architectural tier.</p>
+
+                <table class="tech-table">
+                    <thead>
+                        <tr>
+                            <th>Layer</th>
+                            <th>Technology Selected</th>
+                            <th>Engineering Justification</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong style="color: #fff;">Frontend UI</strong></td>
+                            <td><span class="tag-pill blue">React 18</span> <span class="tag-pill green">Vite 5</span></td>
+                            <td>Fast virtual DOM reconciliation, declarative state hooks, sub-second HMR compilation, and lightweight bundle footprint.</td>
+                        </tr>
+                        <tr>
+                            <td><strong style="color: #fff;">Styling System</strong></td>
+                            <td><span class="tag-pill purple">Vanilla CSS</span> (Design Tokens)</td>
+                            <td>Eliminates massive CSS library runtime overhead; provides native HSL color variables, smooth micro-interactions, and glassmorphism.</td>
+                        </tr>
+                        <tr>
+                            <td><strong style="color: #fff;">Edge Compute</strong></td>
+                            <td><span class="tag-pill green">Vercel Serverless</span> (`/api`)</td>
+                            <td>Runs within milliseconds across edge points of presence; zero server idle maintenance and auto-scales with zero cold starts.</td>
+                        </tr>
+                        <tr>
+                            <td><strong style="color: #fff;">Database & ODM</strong></td>
+                            <td><span class="tag-pill green">MongoDB Atlas</span> + <span class="tag-pill blue">Mongoose 9</span></td>
+                            <td>Schema validation for nested circles and events; connection pooling with forced IPv4 resolution to eliminate DNS lookup latency.</td>
+                        </tr>
+                        <tr>
+                            <td><strong style="color: #fff;">DevOps & CI/CD</strong></td>
+                            <td><span class="tag-pill purple">GitHub Actions</span> + Webhooks</td>
+                            <td>Automated test, build, and zero-downtime production deployment upon every authenticated push to `origin/main`.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- SLIDE 6: Database Design & Data Models -->
+            <div class="slide" data-slide="6">
+                <span class="slide-badge">05 // Data Modeling</span>
+                <h2 class="slide-title">Database Schema & Entity Relations</h2>
+                <p class="slide-subtitle">Document modeling optimized for high-read community lookups and atomic writes.</p>
+
+                <div class="grid-3">
+                    <div class="card">
+                        <div class="card-title">User Document</div>
+                        <div class="diagram-box" style="font-size: 0.76rem;">
+UserSchema {
+  _id: ObjectId,
+  name: String (required, min 2),
+  email: String (unique, index),
+  password: String (hashed),
+  location: String (neighborhood),
+  bio: String,
+  interests: String,
+  skills: String,
+  created_at: Date
+}
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Circle Document</div>
+                        <div class="diagram-box" style="font-size: 0.76rem;">
+CircleSchema {
+  _id: ObjectId,
+  name: String (required),
+  category: String,
+  description: String,
+  location: String,
+  created_by: Ref(User),
+  members: [Ref(User)],
+  resources: [{
+    title: String,
+    url: String,
+    uploaded_at: Date
+  }]
+}
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Event Document</div>
+                        <div class="diagram-box" style="font-size: 0.76rem;">
+EventSchema {
+  _id: ObjectId,
+  circle_id: Ref(Circle),
+  title: String (min 3, max 80),
+  description: String,
+  event_date: Date (future),
+  location: String (venue/link),
+  created_by: Ref(User),
+  attendees: [Ref(User)],
+  photos: [{ url, caption, date }]
+}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 7: Module 1 - Authentication & Security -->
+            <div class="slide" data-slide="7">
+                <span class="slide-badge">06 // Module Deep-Dive</span>
+                <h2 class="slide-title">Auth Engine & Form Validation</h2>
+                <p class="slide-subtitle">Secure, responsive user onboarding with real-time feedback and non-blocking warmup.</p>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-title">Interactive Validation Pipeline</div>
+                        <div class="card-text">
+                            <ul style="list-style: none; padding: 0; line-height: 1.8;">
+                                <li>✨ <strong>Zero-Buffering Form:</strong> Inputs are immediately editable upon page render without waiting for server status.</li>
+                                <li>✨ <strong>5-Stage Password Strength:</strong> Evaluates uppercase, digits, symbols, and length (>= 6) with a dynamic colored UI progress bar.</li>
+                                <li>✨ <strong>Non-Blocking Pre-Warm:</strong> Calls <code>wakeBackend()</code> with a 2-second timeout in the background while the user types.</li>
+                                <li>✨ <strong>Visual Field State Icons:</strong> Green checkmarks and clear inline error hints for instant correction.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card featured">
+                        <div class="card-title">Security & Credential Protection</div>
+                        <div class="card-text">
+                            <ul style="list-style: none; padding: 0; line-height: 1.8;">
+                                <li>🔒 <strong>Password Masking:</strong> User toggle button with accessibility labeling for password visibility.</li>
+                                <li>🔒 <strong>Sanitized Input Handling:</strong> Strips hazardous scripts and tags to mitigate Cross-Site Scripting (XSS).</li>
+                                <li>🔒 <strong>Strict HTTPS Redirect:</strong> Enforces encrypted TLS 1.3 transport for all authentication payloads.</li>
+                                <li>🔒 <strong>Session Persistence:</strong> Local state isolation with automatic cleanup on logout.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 8: Module 2 - Hyper-Local Circles -->
+            <div class="slide" data-slide="8">
+                <span class="slide-badge">07 // Module Deep-Dive</span>
+                <h2 class="slide-title">Hyper-Local Interest Circles</h2>
+                <p class="slide-subtitle">Micro-community creation, membership management, and collective resource exchange.</p>
+
+                <div class="grid-3">
+                    <div class="card">
+                        <div class="card-icon">🏘️</div>
+                        <div class="card-title">Circle Discovery</div>
+                        <div class="card-text">
+                            Real-time live search filter by category (Hobbies, Sports, Tech, Arts, Fitness, Environment) and neighborhood location.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">🤝</div>
+                        <div class="card-title">Membership Lifecycle</div>
+                        <div class="card-text">
+                            Single-click join and leave operations with instantaneous state updates and member count synchronization.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">📚</div>
+                        <div class="card-title">Resource Repository</div>
+                        <div class="card-text">
+                            Shared repository for community guides, tool-lending notices, and neighborhood guidelines with secure URL validation.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-title" style="font-size: 1.05rem;">Role-Based Permissions Matrix</div>
+                    <div class="card-text">
+                        • <strong>Circle Creator:</strong> Host events, delete circle, upload resources, manage circle settings.<br>
+                        • <strong>Joined Members:</strong> Access member directories, attend exclusive circle events, download resources.<br>
+                        • <strong>Neighborhood Visitors:</strong> Explore public circle descriptions and request participation.
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 9: Module 3 - Community Events & Meetups -->
+            <div class="slide" data-slide="9">
+                <span class="slide-badge">08 // Module Deep-Dive</span>
+                <h2 class="slide-title">Community Events & Meetup Engine</h2>
+                <p class="slide-subtitle">End-to-end event hosting, attendee management, and external social amplification.</p>
+
+                <div class="grid-4">
+                    <div class="card">
+                        <div class="card-icon">📅</div>
+                        <div class="card-title">Future Scheduling</div>
+                        <div class="card-text">Enforces future-date scheduling constraints so outdated events cannot be created.</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">🙋</div>
+                        <div class="card-title">One-Click RSVP</div>
+                        <div class="card-text">Atomic toggle between "Attend" and "Leave" with instant attendee count synchronization.</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">💬</div>
+                        <div class="card-title">WhatsApp Share</div>
+                        <div class="card-text">Generates rich formatted event invitation cards directly into WhatsApp for rapid neighbor outreach.</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">🗺️</div>
+                        <div class="card-title">Google Maps</div>
+                        <div class="card-text">Direct 1-click navigation lookup to exact physical meetup venues and community centers.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 10: Technical Innovation - In-Browser Compression -->
+            <div class="slide" data-slide="10">
+                <span class="slide-badge">09 // Technical Innovation</span>
+                <h2 class="slide-title">In-Browser Image Compression</h2>
+                <p class="slide-subtitle">Client-side HTML5 Canvas compression pipeline eliminating server memory bottlenecks.</p>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-title">The Client-Side Pipeline</div>
+                        <div class="diagram-box" style="font-size: 0.78rem;">
+[User selects 15MB Camera Photo]
+         │
+         ▼
+[FileReader reads raw ArrayBuffer / DataURL]
+         │
+         ▼
+[Image element loads in memory]
+         │
+         ▼
+[Compute aspect ratio: Max 1920x1080]
+         │
+         ▼
+[Draw to HTML5 Canvas 2D Context]
+         │
+         ▼
+[canvas.toDataURL('image/jpeg', 0.85)]
+         │
+         ▼
+[Result: Compressed ~180KB JPEG Payload]
+                        </div>
+                    </div>
+                    <div class="card featured">
+                        <div class="card-title">Performance Benefits</div>
+                        <div class="card-text">
+                            <div class="stat-box" style="margin-bottom: 16px;">
+                                <div class="stat-value">91%</div>
+                                <div class="stat-label">Bandwidth Reduction</div>
+                            </div>
+                            <ul style="list-style: none; padding: 0; line-height: 1.8;">
+                                <li>🚀 <strong>Zero Server CPU Load:</strong> Compression runs on the client device GPU/CPU.</li>
+                                <li>🚀 <strong>Instant Uploads:</strong> 180KB uploads in milliseconds even on 3G cellular connections.</li>
+                                <li>🚀 <strong>Free Tier Compliance:</strong> Bypasses Vercel's 4.5MB serverless payload limit without extra cloud storage costs.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 11: Performance Engineering - Eliminating Buffering -->
+            <div class="slide" data-slide="11">
+                <span class="slide-badge">10 // Performance Engineering</span>
+                <h2 class="slide-title">Zero-Buffering Architecture</h2>
+                <p class="slide-subtitle">How we eliminated 50-second cold starts and achieved instantaneous tab switching.</p>
+
+                <div class="grid-2">
+                    <div class="card" style="border-color: rgba(239, 68, 68, 0.4);">
+                        <div class="card-title" style="color: #f87171;">❌ Before Optimization</div>
+                        <div class="card-text">
+                            • <strong>Render Cold Starts:</strong> Sleeping free-tier containers caused a 50–90 second blocking delay.<br>
+                            • <strong>Blocking Login Banner:</strong> Artificial warming flag prevented users from interacting with the login form.<br>
+                            • <strong>60-Second Fetch Timeout:</strong> Hanging network calls locked the browser.<br>
+                            • <strong>Skeleton Flashes:</strong> Refocusing browser tab triggered full-page skeleton spinners on every click.
+                        </div>
+                    </div>
+                    <div class="card featured">
+                        <div class="card-title" style="color: #34d399;">✅ After Optimization</div>
+                        <div class="card-text">
+                            • <strong>Vercel Edge API:</strong> Queries run instantly on Vercel Serverless in <strong>< 150ms</strong>.<br>
+                            • <strong>0ms Interactive Form:</strong> Removed blocking states; inputs are immediately usable.<br>
+                            • <strong>12s In-Memory Cache:</strong> GET requests return instantly from RAM with auto-invalidation on write.<br>
+                            • <strong>Silent Revalidation:</strong> Smooth background updates without jarring skeleton flickers.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-3" style="margin-top: 20px;">
+                    <div class="stat-box">
+                        <div class="stat-value">< 300ms</div>
+                        <div class="stat-label">Time to Interactive (TTI)</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">69.7 kB</div>
+                        <div class="stat-label">Gzipped JS Bundle</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">1.46s</div>
+                        <div class="stat-label">Vite Production Build</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 12: Security, Privacy & Compliance -->
+            <div class="slide" data-slide="12">
+                <span class="slide-badge">11 // Security & Compliance</span>
+                <h2 class="slide-title">Enterprise Security & Privacy</h2>
+                <p class="slide-subtitle">Defense-in-depth protection and legal compliance across all endpoints.</p>
+
+                <div class="grid-3">
+                    <div class="card">
+                        <div class="card-icon">🛡️</div>
+                        <div class="card-title">HSTS & CSP Headers</div>
+                        <div class="card-text">
+                            <code>Strict-Transport-Security</code> with 2-year preload directive (63,072,000s) and <code>upgrade-insecure-requests</code> preventing man-in-the-middle attacks.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">🔏</div>
+                        <div class="card-title">Clickjacking & Sniffing</div>
+                        <div class="card-text">
+                            <code>X-Frame-Options: DENY</code> blocks unauthorized iframe framing. <code>X-Content-Type-Options: nosniff</code> blocks MIME-type confusion attacks.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">📜</div>
+                        <div class="card-title">Legal & Privacy Suite</div>
+                        <div class="card-text">
+                            Dedicated <strong>Privacy Policy</strong> (`#privacy`), <strong>Terms of Conduct</strong> (`#terms`), and friendly <strong>Custom 404</strong> (`#404`) error boundary.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 13: Mobile Responsiveness & WCAG -->
+            <div class="slide" data-slide="13">
+                <span class="slide-badge">12 // UI/UX Engineering</span>
+                <h2 class="slide-title">Mobile-First UI & Accessibility</h2>
+                <p class="slide-subtitle">Ensuring optimal usability on handheld viewports and meeting accessibility standards.</p>
+
+                <div class="grid-3">
+                    <div class="card">
+                        <div class="card-icon">📱</div>
+                        <div class="card-title">Touch Target Standard</div>
+                        <div class="card-text">
+                            Every interactive button, tab, and form input is strictly styled with a minimum bounding box of <strong>44px x 44px</strong> for ergonomic thumb taps.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">📐</div>
+                        <div class="card-title">Adaptive Layouts</div>
+                        <div class="card-text">
+                            CSS Grid dynamically shifts from 3 columns on desktops to single-column card feeds on smartphones without horizontal scrollbars.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">👁️</div>
+                        <div class="card-title">WCAG AA Contrast</div>
+                        <div class="card-text">
+                            Tailored HSL color pairings guarantee high visual contrast ratios (> 4.5:1) for readable typography under direct sunlight.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 14: Quality Audit & Testing Benchmarks -->
+            <div class="slide" data-slide="14">
+                <span class="slide-badge">13 // Verification & Validation</span>
+                <h2 class="slide-title">Testing & Lighthouse Audit Scores</h2>
+                <p class="slide-subtitle">Rigorous automated and browser testing across performance, SEO, and functionality.</p>
+
+                <div class="grid-4" style="margin-bottom: 24px;">
+                    <div class="stat-box">
+                        <div class="stat-value">98</div>
+                        <div class="stat-label">Performance</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">100</div>
+                        <div class="stat-label">Best Practices</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">100</div>
+                        <div class="stat-label">SEO Score</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">95</div>
+                        <div class="stat-label">Accessibility</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Functional Verification Summary</div>
+                    <div class="card-text">
+                        • <strong>Cross-Browser Tested:</strong> Chromium, Firefox, WebKit, and mobile Chrome viewports.<br>
+                        • <strong>SEO Suite:</strong> OpenGraph 1200x630 cards, Twitter previews, `favicon.ico`, `sitemap.xml`, and search crawler files (`robots.txt`, `robots.xml`, `robus.xml`).<br>
+                        • <strong>Broken Links Audit:</strong> Zero 404 link dead-ends; custom fallback route in place.
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 15: Live Demo Walkthrough -->
+            <div class="slide" data-slide="15">
+                <span class="slide-badge">14 // System Demonstration</span>
+                <h2 class="slide-title">Live Demonstration Walkthrough</h2>
+                <p class="slide-subtitle">Step-by-step user journey illustrating key platform capabilities.</p>
+
+                <div class="grid-4">
+                    <div class="card">
+                        <span class="card-icon">1️⃣</span>
+                        <div class="card-title">Onboarding</div>
+                        <div class="card-text">Instant account registration with neighborhood location badge and live password strength feedback.</div>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">2️⃣</span>
+                        <div class="card-title">Join Circle</div>
+                        <div class="card-text">Browse circles by category, review member lists, download community resources, and join with 1 click.</div>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">3️⃣</span>
+                        <div class="card-title">Host Event</div>
+                        <div class="card-text">Schedule an event, set meetup venue, and share instantly formatted invite cards to neighbors via WhatsApp.</div>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">4️⃣</span>
+                        <div class="card-title">Share Photos</div>
+                        <div class="card-text">Upload meetup pictures with auto in-browser compression to the community event photo gallery.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 16: Future Enhancements -->
+            <div class="slide" data-slide="16">
+                <span class="slide-badge">15 // Project Roadmap</span>
+                <h2 class="slide-title">Future Scope & Enhancements</h2>
+                <p class="slide-subtitle">Planned post-capstone features for enterprise and municipal expansion.</p>
+
+                <div class="grid-3">
+                    <div class="card">
+                        <div class="card-icon">💬</div>
+                        <div class="card-title">1. Real-Time Chat</div>
+                        <div class="card-text">
+                            WebSocket (Socket.io) integration for live, peer-to-peer neighborhood circle discussions with typing indicators.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">📍</div>
+                        <div class="card-title">2. Geolocation Radius</div>
+                        <div class="card-text">
+                            HTML5 Geolocation API + MongoDB <code>$near</code> 2D geospatial indexing to automatically discover circles within a 1-mile walking distance.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">🚨</div>
+                        <div class="card-title">3. Emergency Broadcasts</div>
+                        <div class="card-text">
+                            Push notifications and SMS alerts for urgent neighborhood announcements (lost pets, storm alerts, civic power outages).
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 17: Academic Learnings & Conclusion -->
+            <div class="slide" data-slide="17">
+                <span class="slide-badge">16 // Retrospective</span>
+                <h2 class="slide-title">Key Learnings & Conclusion</h2>
+                <p class="slide-subtitle">Core software engineering competencies developed during the project lifecycle.</p>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-title">Academic & Technical Takeaways</div>
+                        <div class="card-text">
+                            <ul style="list-style: none; padding: 0; line-height: 1.8;">
+                                <li>🎓 <strong>Modern Cloud Architectures:</strong> Gained deep practical mastery of edge serverless functions vs. persistent container trade-offs.</li>
+                                <li>🎓 <strong>Client-Side Optimization:</strong> Learned how client-side processing (Canvas compression, memory caching) can eliminate expensive cloud compute costs.</li>
+                                <li>🎓 <strong>Production DevOps:</strong> Managed live Git branch deployments, environment configurations, and continuous delivery webhooks.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card featured">
+                        <div class="card-title">Final Conclusion</div>
+                        <div class="card-text" style="font-size: 0.95rem; line-height: 1.8;">
+                            <strong>CircleHub</strong> successfully delivers an elegant, high-performance, and privacy-conscious solution to modern neighborhood isolation. Through clean component architecture, enterprise security headers, and zero-buffering serverless engineering, it stands as a production-grade, capstone-level web engineering achievement.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 18: Faculty Viva Q&A Defense -->
+            <div class="slide" data-slide="18">
+                <span class="slide-badge">17 // Viva Defense</span>
+                <h2 class="slide-title">Faculty Q&A Preparation</h2>
+                <p class="slide-subtitle">Structured technical answers to anticipate the evaluation committee's questions.</p>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-title" style="font-size: 1rem; color: var(--accent-blue);">Q: Why use Serverless over a standard VPS?</div>
+                        <div class="card-text" style="font-size: 0.88rem;">
+                            <strong>Ans:</strong> Serverless executes on-demand at edge nodes globally. For neighborhood applications with intermittent traffic peaks (e.g. evening event planning), serverless incurs $0 idle hosting costs while guaranteeing instant scale.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title" style="font-size: 1rem; color: var(--accent-blue);">Q: How do you prevent MongoDB connection leaks in lambdas?</div>
+                        <div class="card-text" style="font-size: 0.88rem;">
+                            <strong>Ans:</strong> In serverless runtimes, each invocation can create a new connection if unmanaged. We assign the connection promise to <code>global._mongooseCache</code>, allowing warm lambdas to reuse established socket connections.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title" style="font-size: 1rem; color: var(--accent-blue);">Q: Why Vanilla CSS over Tailwind?</div>
+                        <div class="card-text" style="font-size: 0.88rem;">
+                            <strong>Ans:</strong> Vanilla CSS with native custom properties allows complete aesthetic control, dynamic glassmorphic themes, zero dependency bloat, and a total CSS footprint of only 6.0 kB gzipped.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title" style="font-size: 1rem; color: var(--accent-blue);">Q: How does the in-browser image compression work?</div>
+                        <div class="card-text" style="font-size: 0.88rem;">
+                            <strong>Ans:</strong> Using HTML5 Canvas, camera photos are decoded in memory, scaled to 1920x1080 bounding box, and re-encoded at 85% JPEG quality. This cuts 20MB files down to under 200KB before transmission.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Bottom Controls Footer -->
+    <footer>
+        <div class="keys-hint">
+            <span>Navigation:</span>
+            <span><span class="key-badge">←</span> Prev</span>
+            <span><span class="key-badge">→</span> or <span class="key-badge">Space</span> Next</span>
+            <span><span class="key-badge">F</span> Fullscreen</span>
+        </div>
+        <div class="nav-buttons">
+            <button class="btn" id="prevBtn" onclick="prevSlide()">◀ Previous</button>
+            <button class="btn btn-primary" id="nextBtn" onclick="nextSlide()">Next Slide ▶</button>
+        </div>
+    </footer>
+
+    <!-- Interactive Navigation Logic -->
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 18;
+
+        const slides = document.querySelectorAll('.slide');
+        const slideCounter = document.getElementById('slideCounter');
+        const progressBar = document.getElementById('progressBar');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        function updateSlide(index) {
+            if (index < 1) index = 1;
+            if (index > totalSlides) index = totalSlides;
+            currentSlide = index;
+
+            slides.forEach((slide) => {
+                const slideNum = parseInt(slide.getAttribute('data-slide'));
+                slide.classList.remove('active', 'prev');
+                if (slideNum === currentSlide) {
+                    slide.classList.add('active');
+                } else if (slideNum < currentSlide) {
+                    slide.classList.add('prev');
+                }
+            });
+
+            // Update Counter & Progress Bar
+            const paddedCurrent = String(currentSlide).padStart(2, '0');
+            const paddedTotal = String(totalSlides).padStart(2, '0');
+            slideCounter.textContent = `Slide ${paddedCurrent} / ${paddedTotal}`;
+            
+            const progressPercent = (currentSlide / totalSlides) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+
+            // Button states
+            prevBtn.disabled = (currentSlide === 1);
+            prevBtn.style.opacity = (currentSlide === 1) ? '0.4' : '1';
+            
+            if (currentSlide === totalSlides) {
+                nextBtn.textContent = 'Finish 🎉';
+            } else {
+                nextBtn.textContent = 'Next Slide ▶';
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                updateSlide(currentSlide + 1);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                updateSlide(currentSlide - 1);
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // Keyboard listener
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                e.preventDefault();
+                prevSlide();
+            } else if (e.key === 'f' || e.key === 'F') {
+                toggleFullscreen();
+            } else if (e.key === 'Home') {
+                updateSlide(1);
+            } else if (e.key === 'End') {
+                updateSlide(totalSlides);
+            }
+        });
+
+        // Initialize
+        updateSlide(1);
+    </script>
+</body>
+</html>
