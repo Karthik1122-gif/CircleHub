@@ -11,8 +11,12 @@ const connectDB = async () => {
 
     try {
         await mongoose.connect(MONGO_URI, {
-            serverSelectionTimeoutMS: 8000,
-            socketTimeoutMS: 45000,
+            dbName: 'circlehub',
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 30000,
+            maxPoolSize: 10,
+            minPoolSize: 2,
+            family: 4 // Immediate IPv4 DNS resolution
         });
         console.log('✅ Connected to MongoDB Atlas:', mongoose.connection.name);
     } catch (err) {

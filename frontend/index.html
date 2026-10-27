@@ -2,14 +2,68 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CircleHub - Hyper-Local Neighborhood Communities</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    
+    <!-- Force HTTPS & Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+    <script>
+      // Force HTTPS redirect if accessed via HTTP on public hosts
+      if (location.protocol === 'http:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        location.replace('https:' + window.location.href.substring(window.location.protocol.length));
+      }
+    </script>
+
+    <!-- Primary SEO Meta Tags -->
+    <title>CircleHub - Hyper-Local Neighborhood Communities &amp; Events</title>
+    <meta name="title" content="CircleHub - Hyper-Local Neighborhood Communities &amp; Events" />
+    <meta name="description" content="Connect with your neighbors on CircleHub. Discover local interest circles, host community workshops, share skills, and join neighborhood events near you." />
+    <meta name="keywords" content="CircleHub, neighborhood community, local circles, neighborhood meetups, skill sharing, community events, local workshops, hyper-local social network" />
+    <meta name="author" content="CircleHub Community Network" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="theme-color" content="#10b981" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="canonical" href="https://frontend-seven-black-12.vercel.app/" />
+
+    <!-- Open Graph / Facebook / WhatsApp Social Previews -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://frontend-seven-black-12.vercel.app/" />
+    <meta property="og:site_name" content="CircleHub" />
+    <meta property="og:title" content="CircleHub - Hyper-Local Neighborhood Communities &amp; Events" />
+    <meta property="og:description" content="Connect with your neighbors on CircleHub. Discover local interest circles, host community workshops, share skills, and join neighborhood events near you." />
+    <meta property="og:image" content="https://frontend-seven-black-12.vercel.app/og-image.png" />
+    <meta property="og:image:secure_url" content="https://frontend-seven-black-12.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="CircleHub Hyper-Local Community Network Preview" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card Previews -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://frontend-seven-black-12.vercel.app/" />
+    <meta name="twitter:title" content="CircleHub - Hyper-Local Neighborhood Communities &amp; Events" />
+    <meta name="twitter:description" content="Connect with your neighbors on CircleHub. Discover local interest circles, host community workshops, and join neighborhood events near you." />
+    <meta name="twitter:image" content="https://frontend-seven-black-12.vercel.app/twitter-image.png" />
+    <meta name="twitter:image:alt" content="CircleHub - Hyper-Local Community Platform" />
+
+    <!-- Favicons and App Icons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Performance & Font Optimization -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   </head>
   <body>
+    <noscript>
+      <div style="padding: 20px; text-align: center; background: #fef2f2; color: #991b1b; font-family: sans-serif;">
+        <strong>JavaScript Required:</strong> Please enable JavaScript in your browser to experience CircleHub Community Platform.
+      </div>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

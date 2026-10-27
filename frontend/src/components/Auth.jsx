@@ -17,7 +17,7 @@ function getPasswordStrength(pw) {
 }
 
 /* ── Component ───────────────────────────────────────────── */
-export default function Auth({ onLoginSuccess }) {
+export default function Auth({ onLoginSuccess, onOpenPrivacy, onOpenTerms }) {
     const [isLogin, setIsLogin] = useState(true);
     const [formData, setFormData] = useState({
         name: '', email: '', password: '',
@@ -28,30 +28,10 @@ export default function Auth({ onLoginSuccess }) {
     const [error, setError]               = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [loading, setLoading]           = useState(false);
-    const [serverReady, setServerReady]   = useState(false);
-    const [warming, setWarming]           = useState(true);
 
-    /* Pre-warm backend */
+    // Silently pre-warm server connection in background without blocking UI
     useEffect(() => {
-        let attempts = 0;
-        const maxAttempts = 10;
-
-        const checkServer = async () => {
-            try {
-                const res = await fetch(
-                    (import.meta.env.VITE_API_URL || 'http://localhost:5000/api')
-                        .replace(/\/api\/?$/, '') + '/ping'
-                );
-                if (res.ok) { setServerReady(true); setWarming(false); return; }
-            } catch {}
-
-            attempts++;
-            if (attempts < maxAttempts) setTimeout(checkServer, 4000);
-            else setWarming(false);
-        };
-
         wakeBackend();
-        setTimeout(checkServer, 1500);
     }, []);
 
     /* ── Validation ─────────────────────────────────────── */
@@ -121,6 +101,9 @@ export default function Auth({ onLoginSuccess }) {
                     email: formData.email.trim(),
                     password: formData.password
                 });
+                if (!res || !res.user) {
+                    throw new Error((res && res.error) || 'Login failed. User details were not returned by the server.');
+                }
                 setSuccessMessage('🎉 Login successful! Welcome back!');
                 setTimeout(() => onLoginSuccess(res.user), 500);
             } else {
@@ -128,6 +111,9 @@ export default function Auth({ onLoginSuccess }) {
                     ...formData,
                     email: formData.email.trim()
                 });
+                if (!res || !res.user) {
+                    throw new Error((res && res.error) || 'Registration failed. User details were not returned by the server.');
+                }
                 setSuccessMessage('🎉 Account created successfully! Setting up your dashboard...');
                 setTimeout(() => onLoginSuccess(res.user), 700);
             }
@@ -162,30 +148,6 @@ export default function Auth({ onLoginSuccess }) {
                         : 'Create your account to join nearby interest circles'}
                 </p>
             </div>
-
-            {/* Server warm-up banner */}
-            {warming && !serverReady && (
-                <div style={{
-                    background: '#fffbeb', border: '1px solid #f59e0b',
-                    borderRadius: '8px', padding: '10px 14px',
-                    marginBottom: '16px', fontSize: '0.85rem', color: '#92400e',
-                    display: 'flex', alignItems: 'center', gap: '8px'
-                }}>
-                    <span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>⏳</span>
-                    <span><strong>Connecting to server…</strong> Waking up services. Please wait a moment.</span>
-                </div>
-            )}
-
-            {serverReady && (
-                <div style={{
-                    background: '#f0fdf4', border: '1px solid #22c55e',
-                    borderRadius: '8px', padding: '8px 12px',
-                    marginBottom: '16px', fontSize: '0.82rem', color: '#166534',
-                    display: 'flex', alignItems: 'center', gap: '8px'
-                }}>
-                    ✅ <span><strong>Server is online and ready!</strong></span>
-                </div>
-            )}
 
             {error && (
                 <div className="alert alert-danger" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -377,6 +339,18 @@ export default function Auth({ onLoginSuccess }) {
                         isLogin ? 'Sign In 🚀' : 'Create Account ✨'
                     )}
                 </button>
+                {!isLogin && (
+                    <div style={{ marginTop: '12px', fontSize: '0.8rem', color: '#64748b', textAlign: 'center', lineHeight: '1.4' }}>
+                        By creating an account, you agree to our{' '}
+                        <button type="button" className="link-button" onClick={onOpenTerms}>
+                            Terms &amp; Conditions
+                        </button>
+                        {' '}and{' '}
+                        <button type="button" className="link-button" onClick={onOpenPrivacy}>
+                            Privacy Policy
+                        </button>.
+                    </div>
+                )}
             </form>
 
             <div className="auth-toggle">
@@ -394,11 +368,21 @@ export default function Auth({ onLoginSuccess }) {
             </div>
 
             <div style={{
-                marginTop: '20px', padding: '12px', background: '#f8fafc',
+                marginTop: '16px', padding: '12px', background: '#f8fafc',
                 borderRadius: '8px', fontSize: '0.82rem', color: '#64748b'
             }}>
                 <strong>💡 Quick Demo Login:</strong><br />
                 Email: <code>alex@example.com</code> | Password: <code>password123</code>
+            </div>
+
+            <div style={{ marginTop: '16px', textAlign: 'center', fontSize: '0.8rem', color: '#94a3b8' }}>
+                <button type="button" className="link-button" onClick={onOpenPrivacy} style={{ color: '#64748b' }}>
+                    Privacy Policy
+                </button>
+                <span style={{ margin: '0 8px' }}>•</span>
+                <button type="button" className="link-button" onClick={onOpenTerms} style={{ color: '#64748b' }}>
+                    Terms of Service
+                </button>
             </div>
         </div>
     );

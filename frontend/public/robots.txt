@@ -1,0 +1,8 @@
+# robots.txt for CircleHub Community Platform
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /backend/
+
+# Sitemap location
+Sitemap: https://frontend-seven-black-12.vercel.app/sitemap.xml

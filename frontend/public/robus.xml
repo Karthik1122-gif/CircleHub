@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- robus.xml - Robots/Search engine index directives -->
+<robots>
+  <site>CircleHub - Hyper-Local Neighborhood Communities</site>
+  <url>https://frontend-seven-black-12.vercel.app</url>
+  <rules>
+    <user-agent>*</user-agent>
+    <allow>/</allow>
+    <disallow>/api/</disallow>
+    <disallow>/backend/</disallow>
+  </rules>
+  <sitemap>https://frontend-seven-black-12.vercel.app/sitemap.xml</sitemap>
+</robots>

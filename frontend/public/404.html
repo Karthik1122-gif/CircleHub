@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Neighborhood Not Found | CircleHub</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --dark-bg: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 50% 20%, #1e293b 0%, #0f172a 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+    .badge-icon {
+      width: 76px;
+      height: 76px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.4rem;
+      margin: 0 auto 24px;
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+      animation: pulse 3s infinite ease-in-out;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .glitch-code {
+      font-size: clamp(5rem, 15vw, 9rem);
+      font-weight: 900;
+      letter-spacing: -3px;
+      line-height: 1;
+      background: linear-gradient(135deg, #ffffff 30%, #34d399 70%, #10b981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      font-weight: 700;
+      margin-bottom: 14px;
+      color: #ffffff;
+    }
+    p {
+      color: var(--text-muted);
+      max-width: 480px;
+      margin: 0 auto 32px;
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+    .action-group {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+    .quick-links {
+      margin-top: 48px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+    .quick-links a {
+      color: #34d399;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+    .quick-links a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="badge-icon">🌿</div>
+  <div class="glitch-code">404</div>
+  <h1>Neighborhood Not Found</h1>
+  <p>The page, circle, or community event you are searching for doesn't exist or has moved to a different neighborhood.</p>
+  
+  <div class="action-group">
+    <a href="/" class="btn btn-primary">🏡 Back to Home</a>
+    <a href="/#circles" class="btn btn-outline">Explore Circles</a>
+    <a href="/#events" class="btn btn-outline">View Events</a>
+  </div>
+
+  <div class="quick-links">
+    <span>Need help?</span>
+    <a href="/#privacy">Privacy Policy</a> •
+    <a href="/#terms">Terms of Service</a>
+  </div>
+</body>
+</html>
